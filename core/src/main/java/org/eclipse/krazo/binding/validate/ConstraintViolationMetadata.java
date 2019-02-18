@@ -37,10 +37,12 @@ public class ConstraintViolationMetadata {
 
     private final ConstraintViolation<?> violation;
     private final Annotation[] annotations;
+    private final boolean parentAnnotated;
 
-    public ConstraintViolationMetadata(ConstraintViolation<?> violation, Annotation[] annotations) {
+    public ConstraintViolationMetadata(ConstraintViolation<?> violation, Annotation[] annotations, final boolean parentAnnotated) {
         this.violation = Objects.requireNonNull(violation, "violations");
         this.annotations = Objects.requireNonNull(annotations, "annotations");
+        this.parentAnnotated = parentAnnotated;
     }
 
     public Optional<Annotation> getAnnotation(Class<Annotation> type) {
@@ -49,6 +51,10 @@ public class ConstraintViolationMetadata {
 
     public boolean hasAnnotation(Class<? extends Annotation> type) {
         return Arrays.stream(annotations).anyMatch(a -> a.annotationType().equals(type));
+    }
+
+    public boolean isParentAnnotated() {
+        return parentAnnotated;
     }
 
     public Optional<String> getParamName() {

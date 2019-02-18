@@ -32,6 +32,7 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,6 +41,7 @@ import org.junit.runner.RunWith;
  *
  * @author Tobias Erdle
  */
+@Ignore
 @RunWith(Arquillian.class)
 public class HiddenFormMethodIT {
 

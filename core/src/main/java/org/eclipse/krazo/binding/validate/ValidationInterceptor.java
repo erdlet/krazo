@@ -116,11 +116,10 @@ public class ValidationInterceptor implements Serializable {
         Set<ValidationError> validationErrors = new LinkedHashSet<>();
 
         for (ConstraintViolation<Object> violation : violations) {
-
             ConstraintViolationMetadata metadata = ConstraintViolations.getMetadata(violation);
 
             // MVC bindings
-            if (metadata.hasAnnotation(MvcBinding.class)) {
+            if (metadata.hasAnnotation(MvcBinding.class) || metadata.isParentAnnotated()) {
 
                 String paramName = metadata.getParamName().orElse(null);
                 if (paramName == null) {
@@ -145,7 +144,7 @@ public class ValidationInterceptor implements Serializable {
 
         // update BindingResult
         if (!validationErrors.isEmpty()) {
-            log.log(Level.FINE, "Adding {0} validation errors to binding result", validationErrors.size());
+            log.log(Level.INFO, "Adding {0} validation errors to binding result", validationErrors.size());
             bindingResult.addValidationErrors(validationErrors);
         }
 

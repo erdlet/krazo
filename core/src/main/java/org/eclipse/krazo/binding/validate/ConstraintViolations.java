@@ -17,6 +17,8 @@
  */
 package org.eclipse.krazo.binding.validate;
 
+import java.util.logging.Level;
+import javax.mvc.binding.MvcBinding;
 import javax.validation.ConstraintViolation;
 import javax.validation.ElementKind;
 import javax.validation.Path;
@@ -52,12 +54,39 @@ public class ConstraintViolations {
 
         Annotation[] annotations = getAnnotations(violation);
 
-        return new ConstraintViolationMetadata(violation, annotations);
+        return new ConstraintViolationMetadata(violation, annotations, parentIsMvcBinding(violation));
 
     }
 
-    private static Annotation[] getAnnotations(ConstraintViolation<?> violation) {
+    private static boolean parentIsMvcBinding(ConstraintViolation<?> violation) {
+        // create a simple list of nodes from the path
+        List<Path.Node> nodes = new ArrayList<>();
+        for (Path.Node node : violation.getPropertyPath()) {
+            log.log(Level.INFO, "{0}", node);
+            nodes.add(node);
+        }
 
+        Path.MethodNode methodNode = nodes.get(0).as(Path.MethodNode.class);
+        Path.Node nodeBeforeLastNode = nodes.get(nodes.size() - 2);
+        log.log(Level.INFO, "Node kind {0}", nodeBeforeLastNode.getKind());
+
+        if (nodeBeforeLastNode.getKind() == ElementKind.PARAMETER) {
+            Path.ParameterNode parameterNode = nodeBeforeLastNode.as(Path.ParameterNode.class);
+            final Class<?> beanClass = methodNode.getParameterTypes().get(parameterNode.getParameterIndex());
+
+            log.log(Level.INFO, "Bean class {0}", beanClass.getSimpleName());
+
+            log.log(Level.INFO, "Bean class Annotations: {0}", beanClass.getAnnotations());
+            final boolean isAnnotated = Arrays.stream(beanClass.getAnnotations()).anyMatch(a -> a.annotationType().equals(MvcBinding.class));
+
+            log.log(Level.INFO, "Parent is annotated: {0}", isAnnotated);
+            return isAnnotated;
+        }
+        log.log(Level.INFO, "Parent is annotated: {0}", false);
+        return false;
+    }
+
+    private static Annotation[] getAnnotations(ConstraintViolation<?> violation) {
 
         // create a simple list of nodes from the path
         List<Path.Node> nodes = new ArrayList<>();
